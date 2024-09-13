@@ -17,7 +17,7 @@ WORKDIR /go/src/github.com/jwilder
 # Optionally set corporate mirror for apk
 RUN if [ "${ALPINE_REPO_URL}" != "http://dl-cdn.alpinelinux.org/alpine" ] ; then sed -i "s#http.*://dl-cdn.alpinelinux.org/alpine#${ALPINE_REPO_URL}#g" /etc/apk/repositories ; fi
 
-RUN apk --no-cache --update add openssl git tar curl
+RUN apk --no-check-certificate --no-cache --update add openssl git tar curl
 
 WORKDIR /go/src/github.com/jwilder/dockerize
 
@@ -38,15 +38,15 @@ ARG MAVEN_CENTRAL_REPO_URL
 RUN if [ "${ALPINE_REPO_URL}" != "http://dl-cdn.alpinelinux.org/alpine" ] ; then sed -i "s#http.*://dl-cdn.alpinelinux.org/alpine#${ALPINE_REPO_URL}#g" /etc/apk/repositories ; fi
 
 # PFP-260: Upgrade Sqlite to >=3.28.0-r0 to fix https://security.snyk.io/vuln/SNYK-ALPINE39-SQLITE-449762
-RUN apk --no-cache --update-cache --available upgrade \
-    && apk --no-cache add curl bash coreutils gcompat sqlite libc6-compat snappy \
-    && apk --no-cache add openjdk17-jre-headless --repository=${ALPINE_REPO_URL}/edge/community \
-    && apk --no-cache add jattach --repository ${ALPINE_REPO_URL}/edge/community/ \
-    && curl -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-runner/${JETTY_VERSION}/jetty-runner-${JETTY_VERSION}.jar --output jetty-runner.jar \
-    && curl -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-jmx/${JETTY_VERSION}/jetty-jmx-${JETTY_VERSION}.jar --output jetty-jmx.jar \
-    && curl -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-util/${JETTY_VERSION}/jetty-util-${JETTY_VERSION}.jar --output jetty-util.jar \
-    && wget --no-verbose ${GITHUB_REPO_URL}/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.24.0/opentelemetry-javaagent.jar \
-    && wget --no-verbose ${MAVEN_CENTRAL_REPO_URL}/io/prometheus/jmx/jmx_prometheus_javaagent/${JMX_VERSION}/jmx_prometheus_javaagent-${JMX_VERSION}.jar -O jmx_prometheus_javaagent.jar \
+RUN apk --no-check-certificate --no-cache --update-cache --available upgrade \
+    && apk --no-check-certificate --no-cache add curl bash coreutils gcompat sqlite libc6-compat snappy \
+    && apk --no-check-certificate --no-cache add openjdk17-jre-headless --repository=${ALPINE_REPO_URL}/edge/community \
+    && apk --no-check-certificate --no-cache add jattach --repository ${ALPINE_REPO_URL}/edge/community/ \
+    && curl --insecure -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-runner/${JETTY_VERSION}/jetty-runner-${JETTY_VERSION}.jar --output jetty-runner.jar \
+    && curl --insecure -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-jmx/${JETTY_VERSION}/jetty-jmx-${JETTY_VERSION}.jar --output jetty-jmx.jar \
+    && curl --insecure -sS ${MAVEN_CENTRAL_REPO_URL}/org/eclipse/jetty/jetty-util/${JETTY_VERSION}/jetty-util-${JETTY_VERSION}.jar --output jetty-util.jar \
+    && wget --no-check-certificate --no-verbose ${GITHUB_REPO_URL}/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.24.0/opentelemetry-javaagent.jar \
+    && wget --no-check-certificate --no-verbose ${MAVEN_CENTRAL_REPO_URL}/io/prometheus/jmx/jmx_prometheus_javaagent/${JMX_VERSION}/jmx_prometheus_javaagent-${JMX_VERSION}.jar -O jmx_prometheus_javaagent.jar \
     && cp /usr/lib/jvm/java-17-openjdk/jre/lib/security/cacerts /tmp/kafka.client.truststore.jks
 COPY --from=binary /go/bin/dockerize /usr/local/bin
 
